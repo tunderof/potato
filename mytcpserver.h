@@ -1,5 +1,6 @@
 #ifndef MYTCPSERVER_H
 #define MYTCPSERVER_H
+
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket> // для создания 1 подключения
@@ -15,12 +16,11 @@ public:
     explicit MyTcpServer(QObject *parent = nullptr); // должна вызвать вопросы, берутся константы из QT, можно использовать только опредленный тип объекта
     ~MyTcpServer();
 public slots: // обработчики событий
-    //clientId - пользователь
     void slotNewConnection();
 
-    void slotClientDisconnected(int clientId);
+    void slotClientDisconnected();
 
-    void slotServerRead(int clientId);
+    void slotServerRead();
 private:
     QTcpServer * mTcpServer;
     QList<QTcpSocket *> mTcpSockets;

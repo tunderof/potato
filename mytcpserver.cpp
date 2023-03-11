@@ -1,4 +1,6 @@
 #include "mytcpserver.h"
+#include "serverHandler.h"
+
 #include <QDebug>
 #include <QCoreApplication>
 
@@ -6,7 +8,6 @@
 
 MyTcpServer::~MyTcpServer()
 {
-    //mTcpSocket->close();
     mTcpServer->close();
     server_status=0;
 }
@@ -27,22 +28,28 @@ void MyTcpServer::slotNewConnection(){
     if(server_status==1){
         QTcpSocket *socket = mTcpServer->nextPendingConnection();
         mTcpSockets.append(socket);
-        socket->write("Hello, World!!! I am echo server!\r\n");
-        connect(socket, &QTcpSocket::readyRead, this, [this, socket] { slotServerRead(mTcpSockets.indexOf(socket)); });
-        connect(socket, &QTcpSocket::disconnected, this, [this, socket] { slotClientDisconnected(mTcpSockets.indexOf(socket)); });
+        QString message = QString("Hello, World!!! I am echo server!\r\nYou are user № %1\n").arg(mTcpSockets.size() - 1);
+        QByteArray data = message.toUtf8();
+        socket->write(data);
+        connect(socket, &QTcpSocket::readyRead, this, &MyTcpServer::slotServerRead);
+        connect(socket, &QTcpSocket::disconnected, this, &MyTcpServer::slotClientDisconnected);
     }
 }
 
-void MyTcpServer::slotServerRead(int clientId){
-    QTcpSocket *socket = mTcpSockets.at(clientId);
-    while (socket->bytesAvailable() > 0)
+void MyTcpServer::slotServerRead(){
+    QTcpSocket *socket = (QTcpSocket*)sender();
+    QByteArray array;
+    serverHandler ServerFunc;
+    while (socket->bytesAvailable() > 0) // чтение доступных данных
     {
-        QByteArray array = socket->readAll();
-        socket->write(array);
+        array = socket->readAll(); //считывание всех байтов
     }
+    ServerFunc.parse(array);
+    //socket->write(array); // отвечает обратно
 }
 
-void MyTcpServer::slotClientDisconnected(int clientId){
-    QTcpSocket *socket = mTcpSockets.takeAt(clientId);
+void MyTcpServer::slotClientDisconnected(){
+    QTcpSocket *socket = (QTcpSocket*)sender();
+    mTcpSockets.removeOne(socket);
     socket->close();
 }
