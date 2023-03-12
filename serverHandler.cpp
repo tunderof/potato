@@ -1,12 +1,14 @@
 #include "serverHandler.h"
 
-/*serverHandler::serverHandler(){
+serverHandler::serverHandler(QTcpSocket *clientSocket){
 qDebug()<<"init";
+this->socket = clientSocket;
 }
 
 serverHandler::~serverHandler(){
 qDebug()<<"close";
-}*/
+}
+
 void serverHandler::parse(const QByteArray &array)
 {
     if(array.contains("stop")) {
@@ -35,25 +37,46 @@ void serverHandler::parse(const QByteArray &array)
 QVector<QString> serverHandler::getArgs(const QByteArray &array){
     QString str = QString::fromUtf8(array);
     QStringList parts = str.split("=");
+
+    QVector<QString> vectorData;
+
     if (parts.size() > 1) {
         QString data = parts.at(1); // data после знака =
         data.chop(1); // удаляется символ \n
-        QStringList dataList = data.split("+");
-        QVector<QString> vectorData;
-        for (int i = 0; i < dataList.size(); i++) {
-            QString item = dataList.at(i);
-            vectorData.append(item);
+
+        if(data.contains("+")){
+            QStringList dataList = data.split("+");
+            for (int i = 0; i < dataList.size(); i++) {
+                QString item = dataList.at(i);
+                vectorData.append(item);
+                qDebug() << item << " ";
+            }
+        }
+        else{
+            vectorData.append(data);
+            qDebug() << data;
         }
         return vectorData;
     }
-    qDebug() << "error";
-    //TODO: подумать что возвращать в случае ошибки и в случае отсутвия +
+    qDebug() << "ERROR in getArgs function";
+    vectorData.append("\0");
+    return vectorData;
+}
+
+void serverHandler::sendMessage(const QString &message){
+    QByteArray data = message.toUtf8();
+    socket->write(data);
 }
 
 bool serverHandler::login(const QByteArray &array){
-    if(array.contains("auth1")) return true; //TODO: переделать под функцию getArgs
-    qDebug() << "auth complite";
-    return 0;
+    QVector<QString> args = getArgs(array);
+    if(args.size() == 2){
+        qDebug() << "login: " << args[0] << "\n password:" << args[1];
+        sendMessage("Login Success");
+
+        return true;
+    }
+    return false;
 }
 bool registration(){
     return 0;

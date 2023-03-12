@@ -8,7 +8,8 @@
 class serverHandler
 {
 public:
-    //void deploy(QTcpSocket *socket);
+    serverHandler(QTcpSocket *socket);
+    ~serverHandler();
     void parse(const QByteArray &array);
 private:
     QTcpSocket *socket;
@@ -18,9 +19,8 @@ private:
     bool registration();
     void checkStats();
     bool sendTask();
+    void sendMessage(const QString &message);//для более понятного кода, вынос функции отправки сообщения я в сессию
 
-
-    //QList<QTcpSocket *> mTcpSockets;
 };
 
 #endif // SERVERHANDLER_H
