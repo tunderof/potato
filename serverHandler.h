@@ -5,6 +5,12 @@
 #include <QTcpSocket>
 #include <QDebug>
 
+//database
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QSqlRecord>
+
 class serverHandler
 {
 public:
@@ -17,8 +23,9 @@ private:
 
     bool login(const QByteArray &array);
     bool registration();
-    void checkStats();
     bool sendTask();
+
+    void checkStats();
     void sendMessage(const QString &message);//для более понятного кода, вынос функции отправки сообщения я в сессию
 
 };

@@ -3,27 +3,30 @@
 
 #include <QObject>
 #include <QTcpServer>
-#include <QTcpSocket> // для создания 1 подключения
-
+#include <QTcpSocket>
 #include <QtNetwork>
 #include <QByteArray>
 #include <QDebug>
+#include <QSqlDatabase>
 
 class MyTcpServer : public QObject
 {
-    Q_OBJECT // чето тут наследуется
+    Q_OBJECT
+private:
+    MyTcpServer(QObject *parent = nullptr);
+    static MyTcpServer* instance;
+    QSqlDatabase db;
 public:
-    explicit MyTcpServer(QObject *parent = nullptr); // должна вызвать вопросы, берутся константы из QT, можно использовать только опредленный тип объекта
     ~MyTcpServer();
-public slots: // обработчики событий
+    static MyTcpServer* getInstance();
+public slots:
     void slotNewConnection();
-
     void slotClientDisconnected();
-
     void slotServerRead();
 private:
-    QTcpServer * mTcpServer;
+    QTcpServer *mTcpServer;
     QList<QTcpSocket *> mTcpSockets;
     int server_status;
 };
+
 #endif // MYTCPSERVER_H
