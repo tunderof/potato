@@ -1,12 +1,12 @@
 #include "serverHandler.h"
 
 serverHandler::serverHandler(QTcpSocket *clientSocket){
-qDebug()<<"init";
+qDebug()<<"init socket";
 this->socket = clientSocket;
 }
 
 serverHandler::~serverHandler(){
-qDebug()<<"close";
+qDebug()<<"close socket";
 }
 
 void serverHandler::parse(const QByteArray &array)
@@ -49,12 +49,12 @@ QVector<QString> serverHandler::getArgs(const QByteArray &array){
             for (int i = 0; i < dataList.size(); i++) {
                 QString item = dataList.at(i);
                 vectorData.append(item);
-                qDebug() << item << " ";
+                //qDebug() << item << " "; вывод вводимых аргументов
             }
         }
         else{
             vectorData.append(data);
-            qDebug() << data;
+            //qDebug() << data; вывод вводимого аргумента
         }
         return vectorData;
     }
@@ -70,20 +70,49 @@ void serverHandler::sendMessage(const QString &message){
 
 bool serverHandler::login(const QByteArray &array){
     QVector<QString> args = getArgs(array);
-    if(args.size() == 2){
-        qDebug() << "login: " << args[0] << "\n password:" << args[1];
-        sendMessage("Login Success");
 
-        return true;
+    QSqlDatabase::removeDatabase("qt_sql_default_connection"); //разрыв прошлых соединений
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("Test");
+
+    if (!db.open()) {
+        qDebug() << "ERROR database connection";
+        return -1;
     }
+
+    QString input_login = args[0];
+    QString input_password = args[1];
+
+    QSqlQuery query(db);
+    query.prepare("SELECT COUNT(*) FROM User WHERE login = :login AND password = :password");
+    query.bindValue(":login", input_login);
+    query.bindValue(":password", input_password);
+
+    if(query.exec()) {
+        db.close();
+        if(query.next()) {
+            int count = query.value(0).toInt();
+            if (count == 1) {
+                sendMessage("Login Success\n");
+                return true;
+            }
+        }
+    }
+
+    db.close();
+    qDebug() << "ERROR Incorrect credentials";
+    sendMessage("Incorrect credentials\n");
     return false;
 }
+
 bool registration(){
-    return 0;
+    return false;
 }
+
+bool sendTask(){
+    return false;
+}
+
 void checkStats(){
 
-}
-bool sendTask(){
-    return 0;
 }

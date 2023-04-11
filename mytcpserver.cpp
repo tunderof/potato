@@ -6,6 +6,9 @@
 
 #define PORT 33333
 
+MyTcpServer* MyTcpServer::instance = nullptr;
+
+
 MyTcpServer::~MyTcpServer()
 {
     mTcpServer->close();
@@ -24,13 +27,20 @@ MyTcpServer::MyTcpServer(QObject *parent) : QObject(parent){
     }
 }
 
+MyTcpServer* MyTcpServer::getInstance()
+{
+    if (!instance){
+        instance = new MyTcpServer();
+    }
+    return instance;
+}
+
 void MyTcpServer::slotNewConnection(){
     if(server_status==1){
         QTcpSocket *socket = mTcpServer->nextPendingConnection();
         mTcpSockets.append(socket);
-        QString message = QString("Hello, World!!! I am echo server!\r\nYou are user № %1\n").arg(mTcpSockets.size() - 1);
-        QByteArray data = message.toUtf8();
-        socket->write(data);
+        QByteArray message = QString("Hello, World!!! I am echo server!\r\nYou are user № %1\n").arg(mTcpSockets.size() - 1).toUtf8();
+        socket->write(message);
         connect(socket, &QTcpSocket::readyRead, this, &MyTcpServer::slotServerRead);
         connect(socket, &QTcpSocket::disconnected, this, &MyTcpServer::slotClientDisconnected);
     }
