@@ -1,25 +1,16 @@
 #include "serverHandler.h"
 
-serverHandler::serverHandler(QTcpSocket *clientSocket){
-qDebug()<<"init socket";
-this->socket = clientSocket;
-}
-
-serverHandler::~serverHandler(){
-qDebug()<<"close socket";
-}
-
-void serverHandler::parse(const QByteArray &array)
+QByteArray serverHandler::parse(const QByteArray &array)
 {
+    QByteArray res = "";
     if(array.contains("stop")) {
-        qDebug() << "stop";
+        res= "stop";
     }
     if(array.contains("auth")){
-        qDebug() << "auth";
-        login(array);
+        res=login(array);
     }
     if(array.contains("reg")){
-        qDebug() << "reg";
+        res= "reg";
 
         QVector<QString> vec = getArgs(array); //просто пример
         for(int i =0; i < vec.size();i++){
@@ -27,11 +18,13 @@ void serverHandler::parse(const QByteArray &array)
         }
     }
     if(array.contains("task")){
-        qDebug() << "task";
+        res="task";
     }
     if(array.contains("check")){
-        qDebug() << "check";
+        res="check";
     }
+    qDebug()<<"Server result: " + res;
+    return res;
 }
 
 QVector<QString> serverHandler::getArgs(const QByteArray &array){
@@ -63,56 +56,31 @@ QVector<QString> serverHandler::getArgs(const QByteArray &array){
     return vectorData;
 }
 
-void serverHandler::sendMessage(const QString &message){
-    QByteArray data = message.toUtf8();
-    socket->write(data);
-}
-
-bool serverHandler::login(const QByteArray &array){
+QByteArray serverHandler::login(const QByteArray &array){
     QVector<QString> args = getArgs(array);
-
-    QSqlDatabase::removeDatabase("qt_sql_default_connection"); //разрыв прошлых соединений
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("Test");
-
-    if (!db.open()) {
-        qDebug() << "ERROR database connection";
-        return -1;
-    }
 
     QString input_login = args[0];
     QString input_password = args[1];
+    qDebug() << input_login << "\t" << input_password;
+    //TODO: Добавить хэширование
 
-    QSqlQuery query(db);
-    query.prepare("SELECT COUNT(*) FROM User WHERE login = :login AND password = :password");
-    query.bindValue(":login", input_login);
-    query.bindValue(":password", input_password);
-
-    if(query.exec()) {
-        db.close();
-        if(query.next()) {
-            int count = query.value(0).toInt();
-            if (count == 1) {
-                sendMessage("Login Success\n");
-                return true;
-            }
-        }
+    QSqlQuery query = DatabaseControl::getInstance()->doSQLQuery(
+        "SELECT * FROM User WHERE login = '" + input_login + "' AND password = '" + input_password + "'");
+    if (query.next()) {
+        return "Valid";
+    } else {
+        return "ERROR";
     }
-
-    db.close();
-    qDebug() << "ERROR Incorrect credentials";
-    sendMessage("Incorrect credentials\n");
-    return false;
 }
 
-bool registration(){
-    return false;
+QByteArray registration(){
+    return "Reg";
 }
 
-bool sendTask(){
-    return false;
+QByteArray sendTask(){
+    return "Send Task";
 }
 
-void checkStats(){
-
+QByteArray checkStats(){
+    return "Check Stats";
 }
