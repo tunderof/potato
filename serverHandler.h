@@ -2,11 +2,12 @@
 #define SERVERHANDLER_H
 
 #include <QByteArray>
-#include <QTcpSocket>
 #include <QDebug>
+#include <QVariant>
+
+#include "databasecontrol.h"
 
 //database
-#include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QSqlRecord>
@@ -14,19 +15,17 @@
 class serverHandler
 {
 public:
-    serverHandler(QTcpSocket *socket);
-    ~serverHandler();
-    void parse(const QByteArray &array);
+    QByteArray parse(const QByteArray &array);
 private:
-    QTcpSocket *socket;
+    //QTcpSocket *socket;
     QVector<QString> getArgs(const QByteArray &array);
 
-    bool login(const QByteArray &array);
-    bool registration();
-    bool sendTask();
+    QByteArray login(const QByteArray &array);
+    QByteArray registration();
+    QByteArray sendTask();
 
-    void checkStats();
-    void sendMessage(const QString &message);//для более понятного кода, вынос функции отправки сообщения я в сессию
+    QByteArray checkStats();
+    //void sendMessage(const QString &message);//для более понятного кода, вынос функции отправки сообщения я в сессию
 
 };
 

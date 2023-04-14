@@ -49,12 +49,12 @@ void MyTcpServer::slotNewConnection(){
 void MyTcpServer::slotServerRead(){
     QTcpSocket *socket = (QTcpSocket*)sender();
     QByteArray array;
-    serverHandler ServerFunc(socket);
+    serverHandler ServerFunc;
     while (socket->bytesAvailable() > 0) // чтение доступных данных
     {
         array = socket->readAll(); //считывание всех байтов
     }
-    ServerFunc.parse(array);
+    socket->write(ServerFunc.parse(array)+"\n");
     //socket->write(array); // отвечает обратно
 }
 
