@@ -21,9 +21,10 @@ private:
 
     QByteArray login(const QByteArray &array);
     QByteArray registration(const QByteArray &array);
-    QByteArray sendTask();
+    QByteArray sendTask(const QByteArray &array);
 
-    QByteArray checkStats();
+    QString checkStats(const QByteArray &array);
+    QString getTaskAnswer(int taskID);
     //void sendMessage(const QString &message);//для более понятного кода, вынос функции отправки сообщения я в сессию
 
 };

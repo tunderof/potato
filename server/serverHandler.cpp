@@ -89,10 +89,57 @@ QByteArray serverHandler::registration(const QByteArray &array){
     }
 }
 
-QByteArray sendTask(){
-    return "Send Task";
+QString serverHandler::getTaskAnswer(int taskID){
+    QString answer;
+    QSqlQuery query = DatabaseControl::getInstance()->doSQLQuery(
+        "SELECT Answer FROM Tasks WHERE id = '" + QString::number(taskID) + "'");
+    if(query.next()){
+        answer = query.value(0).toString();
+    }
+    return answer;
 }
 
-QByteArray checkStats(){
-    return "Check Stats";
+QByteArray serverHandler::sendTask(const QByteArray &array){
+    QVector<QString> args = getArgs(array);
+
+    int task_id = args[0].toInt();
+    int user_id = args[1].toInt();
+    QString user_answer = args[2];
+    QString answer = getTaskAnswer(task_id);
+    bool is_correct = false;
+    if (answer == user_answer){
+        is_correct = true;
+    }
+
+    QSqlQuery query = DatabaseControl::getInstance()->doSQLQuery(
+        "INSERT INTO Answers (TaskId, UserId, Answer, IsCorrect) VALUES('" + args[0] + "','" + user_id + "','" + user_answer + "','" + is_correct + "');");
+    if (query.next()) {
+        return "true";
+    } else {
+        return "false";
+    }
+}
+
+
+
+QString serverHandler::checkStats(const QByteArray &array){
+    QVector<QString> args = getArgs(array);
+
+    int total = 0, correct = 0;
+
+    QString user_id = args[0];
+
+    QSqlQuery query = DatabaseControl::getInstance()->doSQLQuery(
+        "SELECT isCorrect FROM Answers WHERE UserId = '" + user_id + "';");
+    while (query.next())
+        {
+            if (query.value(0).toBool()) {
+                correct++;
+            }
+            total++;
+        }
+    QString result = "Правильных:" + QString::number(correct);
+    result += "Из:" + QString::number(total);
+
+    return result;
 }

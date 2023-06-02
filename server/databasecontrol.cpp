@@ -17,12 +17,12 @@ DatabaseControl::DatabaseControl()
         qDebug() << this->dbInstance.lastError().text();
     };
     /*QSqlQuery *query = new QSqlQuery(this->dbInstance);
-    query->exec("CREATE TABLE Users(id integer not null primary key, login TEXT, password TEXT);");
+    query->exec("CREATE TABLE Users(id integer not null primary key AUTOINCREMENT, login TEXT, password TEXT);");
+    query->exec("CREATE TABLE Tasks(id integer not null primary key AUTOINCREMENT, Name TEXT, Description TEXT, Answer TEXT);");
+    query->exec("CREATE TABLE Answers(id integer not null primary key AUTOINCREMENT, TaskId INTEGER, UserId INTEGER, Answer TEXT, IsCorrect BOOLEAN);");
 
-    query->prepare("INSERT INTO users (Login, Password) VALUES(:Login, :Password)");
-    query->bindValue(":Login", "admin");
-    query->bindValue(":Password", "202cb962ac59075b964b07152d234b70");
-    query->exec();*/
+    query->exec("INSERT INTO Tasks (Name, Description, Answer) VALUES ('Task 1', 'Task 1', '1');");
+    */
 }
 
 DatabaseControl::~DatabaseControl() {
