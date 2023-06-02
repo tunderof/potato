@@ -3,7 +3,6 @@
 
 #include <QByteArray>
 #include <QDebug>
-#include <QVariant>
 
 #include "databasecontrol.h"
 
@@ -21,7 +20,7 @@ private:
     QVector<QString> getArgs(const QByteArray &array);
 
     QByteArray login(const QByteArray &array);
-    QByteArray registration();
+    QByteArray registration(const QByteArray &array);
     QByteArray sendTask();
 
     QByteArray checkStats();

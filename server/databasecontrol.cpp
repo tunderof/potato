@@ -7,7 +7,7 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
-#define _DB_NAME "Test"
+#define _DB_NAME "potato.db"
 
 DatabaseControl::DatabaseControl()
 {
@@ -16,6 +16,13 @@ DatabaseControl::DatabaseControl()
     if (!this->dbInstance.open()) {
         qDebug() << this->dbInstance.lastError().text();
     };
+    /*QSqlQuery *query = new QSqlQuery(this->dbInstance);
+    query->exec("CREATE TABLE Users(id integer not null primary key, login TEXT, password TEXT);");
+
+    query->prepare("INSERT INTO users (Login, Password) VALUES(:Login, :Password)");
+    query->bindValue(":Login", "admin");
+    query->bindValue(":Password", "202cb962ac59075b964b07152d234b70");
+    query->exec();*/
 }
 
 DatabaseControl::~DatabaseControl() {
@@ -30,7 +37,7 @@ QSqlQuery DatabaseControl::doSQLQuery(QString stringQuery) {
     return query;
 }
 
-DatabaseDestroyer DatabaseControl::destroyer;
+DatabaseDestroyer DatabaseControl::destroyer; // под вопросом
 
 DatabaseControl* DatabaseControl::pInstance = nullptr;
 QSqlDatabase DatabaseControl::dbInstance;

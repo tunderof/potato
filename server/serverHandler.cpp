@@ -1,27 +1,27 @@
 #include "serverHandler.h"
 
+#include <QCryptographicHash>
+
 QByteArray serverHandler::parse(const QByteArray &array)
 {
     QByteArray res = "";
     if(array.contains("stop")) {
         res= "stop";
     }
-    if(array.contains("auth")){
-        res=login(array);
+    else if(array.contains("auth")){
+        res = login(array);
     }
-    if(array.contains("reg")){
-        res= "reg";
-
-        QVector<QString> vec = getArgs(array); //просто пример
-        for(int i =0; i < vec.size();i++){
-            qDebug() << vec[i];
-        }
+    else if(array.contains("reg")){
+        res= registration(array);
     }
-    if(array.contains("task")){
+    else if(array.contains("task")){
         res="task";
     }
-    if(array.contains("check")){
+    else if(array.contains("check")){
         res="check";
+    }
+    else{
+        res="Wrong command";
     }
     qDebug()<<"Server result: " + res;
     return res;
@@ -61,20 +61,32 @@ QByteArray serverHandler::login(const QByteArray &array){
 
     QString input_login = args[0];
     QString input_password = args[1];
-    qDebug() << input_login << "\t" << input_password;
-    //TODO: Добавить хэширование
+    QString hashed_pass = QString(QCryptographicHash::hash((input_password.toUtf8()),QCryptographicHash::Md5).toHex());
+    qDebug() << input_login << "\t" << hashed_pass;
 
     QSqlQuery query = DatabaseControl::getInstance()->doSQLQuery(
-        "SELECT * FROM User WHERE login = '" + input_login + "' AND password = '" + input_password + "'");
+        "SELECT * FROM Users WHERE login = '" + input_login + "' AND password = '" + hashed_pass + "'");
     if (query.next()) {
-        return "Valid";
+        return "true";
     } else {
-        return "ERROR";
+        return "false";
     }
 }
 
-QByteArray registration(){
-    return "Reg";
+QByteArray serverHandler::registration(const QByteArray &array){
+    QVector<QString> args = getArgs(array);
+
+    QString input_login = args[0];
+    QString input_password = args[1];
+    QString hashed_pass = QString(QCryptographicHash::hash((input_password.toUtf8()),QCryptographicHash::Md5).toHex());
+
+    QSqlQuery query = DatabaseControl::getInstance()->doSQLQuery(
+        "INSERT INTO Users (login, password) VALUES('" + input_login + "','" + hashed_pass + "')");
+    if (query.next()) {
+        return "true";
+    } else {
+        return "false";
+    }
 }
 
 QByteArray sendTask(){
