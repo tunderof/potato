@@ -15,10 +15,10 @@ QByteArray serverHandler::parse(const QByteArray &array)
         res= registration(array);
     }
     else if(array.contains("task")){
-        res="task";
+        res= sendTask(array);
     }
     else if(array.contains("check")){
-        res="check";
+        res = checkStats(array).toUtf8();
     }
     else{
         res="Wrong command";
